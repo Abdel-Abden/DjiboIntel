@@ -1,3 +1,10 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/"
+  to = "/djibointel.html"
+  status = 200
 redirectsOrigin = "config"
 plugins = []
 headers = []
