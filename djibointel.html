@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>DjiboIntel — Veille Stratégique Nationale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#080a0f;--bg2:#0d1018;--bg3:#131720;--bg4:#1a2030;--bg5:#212840;
+  --border:rgba(255,255,255,0.055);--border2:rgba(255,255,255,0.11);--border3:rgba(255,255,255,0.18);
+  --text:#dde2f0;--text2:#a8b0cc;--muted:#5a6480;--hint:#2a3050;
+  --blue:#4d8ef5;--blue2:#7ab3ff;--green:#1fc85a;--red:#f04040;
+  --amber:#f0990a;--teal:#10b8a6;--purple:#8b5cf6;--pink:#e040c8;
+  --font:'DM Sans',system-ui,sans-serif;--display:'Syne',system-ui,sans-serif;--mono:'IBM Plex Mono','Courier New',monospace;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
+  --sidebar-w:228px;
+}
+html{height:100%;scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100%;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
+
+/* LIGHT THEME */
+body.light{--bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;--bg4:#e8edf5;--bg5:#dce4f0;--border:rgba(0,0,0,.07);--border2:rgba(0,0,0,.12);--border3:rgba(0,0,0,.18);--text:#1a2236;--text2:#4a5568;--muted:#94a3b8;--hint:#cbd5e1;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--amber:#d97706;--teal:#0d9488;--purple:#7c3aed;}
+
+/* LAYOUT */
+.layout{display:flex;min-height:100vh;position:relative;z-index:1;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.sidebar::-webkit-scrollbar{width:0;}
+.logo-area{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+.logo-mark{display:flex;align-items:center;gap:11px;}
+.logo-sq{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:13px;font-weight:800;color:#fff;letter-spacing:-1px;flex-shrink:0;box-shadow:0 4px 20px rgba(77,142,245,.4);}
+.logo-name{font-family:var(--display);font-size:15px;font-weight:800;letter-spacing:-.3px;color:var(--text);}
+.logo-sub{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.nav-area{padding:12px 10px;flex:1;}
+.nav-sec{margin-bottom:20px;}
+.nav-lbl{font-size:9px;color:var(--hint);letter-spacing:1.4px;text-transform:uppercase;padding:0 8px;margin-bottom:6px;font-weight:600;}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:12.5px;font-weight:500;transition:all .15s;position:relative;margin-bottom:1px;}
+.ni:hover{background:var(--bg3);color:var(--text);}
+.ni.on{background:rgba(77,142,245,.1);color:var(--blue);}
+.ni-ico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.ni-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:10px;padding:1px 5px;font-family:var(--mono);}
+.sb-footer{padding:14px 14px calc(14px + var(--safe-bot));border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+.av-name{font-size:11px;font-weight:600;color:var(--text);}
+.av-role{font-size:9px;color:var(--muted);}
+
+/* SIDEBAR COLLAPSED */
+html.sidebar-collapsed .sidebar{width:58px;}
+html.sidebar-collapsed .logo-name,html.sidebar-collapsed .logo-sub,html.sidebar-collapsed .ni-badge,
+html.sidebar-collapsed .ni > span:not(.ni-ico),html.sidebar-collapsed .nav-lbl,
+html.sidebar-collapsed .av-name,html.sidebar-collapsed .av-role,html.sidebar-collapsed .ni-text{opacity:0;width:0;overflow:hidden;white-space:nowrap;}
+html.sidebar-collapsed .ni{justify-content:center;padding:8px 0;}
+html.sidebar-collapsed .sb-footer{justify-content:center;}
+html.sidebar-collapsed .main{margin-left:58px;}
+
+/* MAIN */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;background:rgba(8,10,15,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;z-index:50;min-height:52px;}
+body.light .topbar{background:rgba(241,245,249,.88);}
+.page-title{font-family:var(--display);font-size:14px;font-weight:700;color:var(--text);}
+.page-sub{font-size:10px;color:var(--muted);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(31,200,90,.12);border:1px solid rgba(31,200,90,.25);border-radius:20px;padding:3px 9px;font-size:9px;font-weight:700;color:var(--green);letter-spacing:.8px;font-family:var(--mono);}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.date-chip{font-family:var(--mono);font-size:10px;color:var(--muted);padding:4px 9px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;}
+.notif-btn{position:relative;cursor:pointer;font-size:16px;padding:2px;}
+.notif-dot{position:absolute;top:0;right:0;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--bg2);}
+.sidebar-toggle{width:26px;height:26px;border-radius:7px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--muted);transition:all .15s;}
+.sidebar-toggle:hover{background:var(--bg4);color:var(--text);}
+.menu-btn{width:30px;height:30px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;display:none;}
+
+/* CONTENT */
+.content{padding:20px;flex:1;}
+.panel{display:none;}
+.panel.on{display:block;}
+
+/* ALERT BANNER */
+.alert-banner{background:rgba(240,64,64,.08);border:1px solid rgba(240,64,64,.2);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:20px;animation:slideIn .4s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.alert-dot{width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0;animation:pulse 1.2s infinite;}
+.alert-text{font-size:12px;color:var(--text2);flex:1;line-height:1.5;}
+.alert-time{font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap;}
+
+/* SECTION LABELS */
+.sec-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.4px;font-weight:600;margin-bottom:12px;}
+
+/* KPI GRID */
+.kpi-grid{display:grid;gap:12px;margin-bottom:20px;}
+.kg-5{grid-template-columns:repeat(5,minmax(0,1fr));}
+.kcard{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;transition:all .2s;position:relative;overflow:hidden;}
+.kcard:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.kcard::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.02),transparent);pointer-events:none;}
+.kcard-label{font-size:10px;color:var(--muted);line-height:1.4;margin-bottom:8px;}
+.kcard-val{font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;}
+.kcard-delta{font-family:var(--mono);font-size:9px;font-weight:600;}
+.dlt-up{color:var(--green);}
+.dlt-dn{color:var(--red);}
+.kbl{border-top:2px solid var(--blue);}
+.kgr{border-top:2px solid var(--green);}
+.kam{border-top:2px solid var(--amber);}
+.kte{border-top:2px solid var(--teal);}
+.krd{border-top:2px solid var(--red);}
+.kpu{border-top:2px solid var(--purple);}
+
+/* SPARKLINES */
+.spark{display:flex;align-items:flex-end;gap:2px;margin-top:8px;height:22px;}
+.spk{border-radius:2px;opacity:.8;transition:height .3s;}
+
+/* GRID 2 COLS */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.card-title{font-family:var(--display);font-size:12px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.card-sub{font-size:10px;color:var(--muted);}
+
+/* SIGNAL ITEMS */
+.signal-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.signal-item:last-child{border-bottom:none;}
+.sig-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.sig-txt{flex:1;font-size:11.5px;color:var(--text2);line-height:1.5;}
+.sig-meta{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.sig-tag{display:inline-block;font-size:8px;font-weight:700;border-radius:4px;padding:2px 6px;margin-right:4px;text-transform:uppercase;letter-spacing:.5px;}
+.tag-haute{background:rgba(240,64,64,.15);color:var(--red);}
+.tag-moyen{background:rgba(240,153,10,.15);color:var(--amber);}
+.tag-faible{background:rgba(31,200,90,.15);color:var(--green);}
+.tag-port{background:rgba(77,142,245,.12);color:var(--blue);}
+.tag-telecom{background:rgba(16,184,166,.12);color:var(--teal);}
+.tag-energie{background:rgba(240,153,10,.12);color:var(--amber);}
+.tag-secu{background:rgba(240,64,64,.12);color:var(--red);}
+.tag-dtfe{background:rgba(139,92,246,.12);color:var(--purple);}
+
+/* RISK MATRIX */
+.risk-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.risk-name{font-size:11px;color:var(--text2);width:160px;flex-shrink:0;}
+.risk-bar-wrap{flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;}
+.risk-bar{height:100%;border-radius:3px;transition:width 1s ease;}
+.risk-score{font-family:var(--mono);font-size:10px;font-weight:600;width:30px;text-align:right;}
+
+/* POSTS */
+.post-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.post-item:last-child{border-bottom:none;}
+.post-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.post-body{flex:1;}
+.post-handle{font-size:10px;font-weight:700;color:var(--text);}
+.post-plat{font-size:9px;color:var(--muted);}
+.post-text{font-size:11.5px;color:var(--text2);line-height:1.55;margin-top:3px;}
+.post-stats{display:flex;gap:12px;margin-top:5px;}
+.post-stat{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.post-sent{font-size:9px;font-weight:600;border-radius:4px;padding:2px 6px;}
+.sent-pos{background:rgba(31,200,90,.12);color:var(--green);}
+.sent-neg{background:rgba(240,64,64,.12);color:var(--red);}
+.sent-neu{background:rgba(90,100,128,.15);color:var(--muted);}
+
+/* FILTER ROW */
+.filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.fbtn{padding:5px 12px;border-radius:20px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border2);color:var(--muted);background:transparent;transition:all .15s;font-family:var(--font);}
+.fbtn:hover{border-color:var(--border3);color:var(--text);}
+.fbtn.on{background:rgba(77,142,245,.15);border-color:rgba(77,142,245,.4);color:var(--blue);}
+
+/* NEWS ITEMS */
+.news-item{padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.news-item:last-child{border-bottom:none;}
+.news-item:hover .news-title{color:var(--blue);}
+.news-src{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.news-title{font-size:12px;color:var(--text);font-weight:600;margin:3px 0;line-height:1.4;transition:color .15s;}
+.news-meta{font-family:var(--mono);font-size:9px;color:var(--muted);display:flex;gap:8px;align-items:center;}
+
+/* CHART WRAP */
+.chart-wrap{position:relative;height:180px;margin-top:8px;}
+
+/* IDE ITEMS */
+.ide-item{padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;}
+.ide-item:hover{border-color:var(--border2);background:var(--bg3);}
+.ide-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.ide-title{font-size:12px;font-weight:600;color:var(--text);line-height:1.4;}
+.ide-score{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--purple);background:rgba(139,92,246,.1);border-radius:6px;padding:2px 7px;flex-shrink:0;}
+.ide-meta{display:flex;gap:6px;flex-wrap:wrap;}
+.ide-amount{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--green);}
+
+/* PORT TABLE */
+.port-table{width:100%;border-collapse:collapse;font-size:11px;}
+.port-table th{text-align:left;padding:7px 10px;font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);}
+.port-table td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle;}
+.port-table tr:last-child td{border-bottom:none;}
+.port-table tr:hover td{background:var(--bg3);}
+.port-rank{font-family:var(--mono);font-weight:700;color:var(--muted);}
+.port-name{font-weight:600;color:var(--text);}
+
+/* STAT BADGE */
+.stat-badge{display:inline-block;padding:2px 7px;border-radius:5px;font-family:var(--mono);font-size:9px;font-weight:600;}
+.up{background:rgba(31,200,90,.12);color:var(--green);}
+.dn{background:rgba(240,64,64,.12);color:var(--red);}
+.neu{background:rgba(90,100,128,.12);color:var(--muted);}
+
+/* REPORT CARD */
+.rep-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;cursor:pointer;transition:all .15s;}
+.rep-card:hover{border-color:var(--border2);}
+.rep-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.rep-title{font-size:12px;font-weight:600;color:var(--text);}
+.rep-date{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:3px;}
+.rep-tag{display:inline-block;font-size:8px;font-weight:700;border-radius:4px;padding:2px 6px;margin-top:4px;}
+
+/* SETTINGS */
+.sett-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.sett-row:last-child{border-bottom:none;}
+.sett-label{font-size:12px;color:var(--text);}
+.sett-sub{font-size:10px;color:var(--muted);}
+.toggle{position:relative;width:36px;height:20px;cursor:pointer;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;border-radius:10px;background:var(--bg4);transition:all .2s;}
+.toggle input:checked+.toggle-slider{background:var(--blue);}
+.toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;border-radius:50%;background:#fff;transition:all .2s;}
+.toggle input:checked+.toggle-slider:before{transform:translateX(16px);}
+
+/* THEME TOGGLE */
+.theme-opt{display:flex;gap:8px;margin-top:12px;}
+.theme-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border2);cursor:pointer;text-align:center;transition:all .15s;font-size:11px;font-weight:600;background:var(--bg3);color:var(--muted);}
+.theme-btn.selected{border-color:var(--blue);color:var(--blue);background:rgba(77,142,245,.08);}
+
+/* API STATUS */
+.api-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.api-row:last-child{border-bottom:none;}
+.api-name{font-size:12px;font-weight:600;color:var(--text);}
+.api-desc{font-size:10px;color:var(--muted);}
+.api-status{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;font-weight:700;}
+.api-dot{width:6px;height:6px;border-radius:50%;}
+.api-dot.ok{background:var(--green);}
+.api-dot.pending{background:var(--amber);}
+.api-dot.off{background:var(--muted);}
+
+/* OVERLAY MOBILE */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+.overlay.show{display:block;}
+
+/* BOTTOM NAV */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:100;padding:6px 0 calc(6px + var(--safe-bot));justify-content:space-around;}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 12px;border-radius:8px;transition:all .15s;}
+.bn-item.on{color:var(--blue);}
+.bn-item:not(.on){color:var(--muted);}
+.bn-ico{font-size:18px;}
+.bn-lbl{font-size:8px;font-weight:600;}
+
+/* LOADING SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* PULSE BADGE */
+.pulse-badge{animation:pulseBg 2s infinite;}
+@keyframes pulseBg{0%,100%{opacity:1;}50%{opacity:.6;}}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:2px;}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .menu-btn{display:flex!important;}
+  .sidebar-toggle{display:none!important;}
+  .bottom-nav{display:flex;}
+  .content{padding:14px;padding-bottom:80px;}
+  .kg-5{grid-template-columns:repeat(3,1fr);}
+  .grid2{grid-template-columns:1fr;}
+  .grid3{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:540px){
+  .kg-5{grid-template-columns:repeat(2,1fr);}
+  .grid3{grid-template-columns:1fr;}
+}
+
+/* ENTRY ANIMATION */
+.panel.on .kcard{animation:fadeUp .3s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.kcard:nth-child(1){animation-delay:.05s;}
+.kcard:nth-child(2){animation-delay:.1s;}
+.kcard:nth-child(3){animation-delay:.15s;}
+.kcard:nth-child(4){animation-delay:.2s;}
+.kcard:nth-child(5){animation-delay:.25s;}
+
+/* DJIBOUTI FLAG BAR */
+.flag-bar{height:3px;background:linear-gradient(90deg,#6ab2e7 0%,#6ab2e7 33%,#12ad2b 33%,#12ad2b 66%,#ffffff 66%,#ffffff 100%);position:fixed;top:0;left:0;right:0;z-index:999;}
+</style>
+</head>
+<body>
+<div class="flag-bar"></div>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="layout">
+
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<div class="sidebar" id="sidebar">
+  <div class="logo-area">
+    <div class="logo-mark">
+      <div class="logo-sq">DJ</div>
+      <div>
+        <div class="logo-name">DjiboIntel</div>
+        <div class="logo-sub">Veille stratégique</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-area">
+    <div class="nav-sec">
+      <div class="nav-lbl">Modules</div>
+      <div class="ni on" onclick="go('dash',this)"><div class="ni-ico" style="background:rgba(77,142,245,.12);">📊</div><span class="ni-text">Tableau de bord</span></div>
+      <div class="ni" onclick="go('social',this)"><div class="ni-ico" style="background:rgba(224,64,200,.1);">📡</div><span class="ni-text">Veille sociale</span><span class="ni-badge">12</span></div>
+      <div class="ni" onclick="go('veille',this)"><div class="ni-ico" style="background:rgba(139,92,246,.1);">📰</div><span class="ni-text">Veille médias</span></div>
+      <div class="ni" onclick="go('concur',this)"><div class="ni-ico" style="background:rgba(16,184,166,.1);">⚓</div><span class="ni-text">Concurrentiel</span></div>
+      <div class="ni" onclick="go('marches',this)"><div class="ni-ico" style="background:rgba(240,153,10,.1);">📈</div><span class="ni-text">Marchés &amp; Maritime</span></div>
+      <div class="ni" onclick="go('ide',this)"><div class="ni-ico" style="background:rgba(139,92,246,.1);">💰</div><span class="ni-text">Module IDE</span></div>
+      <div class="ni" onclick="go('rapports',this)"><div class="ni-ico" style="background:rgba(31,200,90,.1);">📄</div><span class="ni-text">Rapports exécutifs</span></div>
+      <div class="ni" onclick="go('settings',this)"><div class="ni-ico" style="background:rgba(90,100,128,.1);">⚙️</div><span class="ni-text">Paramètres</span></div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-lbl">Secteurs</div>
+      <div class="ni"><div class="ni-ico" style="background:rgba(77,142,245,.1);">🔵</div><span class="ni-text">Port de Djibouti</span></div>
+      <div class="ni"><div class="ni-ico" style="background:rgba(240,153,10,.1);">🟡</div><span class="ni-text">Djibouti Télécom</span></div>
+      <div class="ni"><div class="ni-ico" style="background:rgba(16,184,166,.1);">🔵</div><span class="ni-text">Énergie &amp; Eau</span></div>
+      <div class="ni"><div class="ni-ico" style="background:rgba(31,200,90,.1);">🟢</div><span class="ni-text">Zone Franche DTFE</span></div>
+      <div class="ni"><div class="ni-ico" style="background:rgba(240,64,64,.1);">🔴</div><span class="ni-text">Sécurité régionale</span></div>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <div class="av">MA</div>
+    <div>
+      <div class="av-name">Min. Aff. Économiques</div>
+      <div class="av-role">Accès exécutif · Niveau 1</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div class="main">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div class="menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</div>
+    <div class="sidebar-toggle" onclick="toggleCollapse()" title="Réduire le menu">◀</div>
+    <div class="page-info">
+      <div class="page-title" id="page-title">Tableau de bord exécutif</div>
+      <div class="page-sub">Tous secteurs · Mise à jour toutes les 30 min</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+    <div class="date-chip" id="date-chip">—</div>
+    <div class="notif-btn" title="Notifications">🔔<div class="notif-dot"></div></div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ══════════════════════════════════════════════════════
+     DASHBOARD
+══════════════════════════════════════════════════════ -->
+<div class="panel on" id="p-dash">
+  <div class="alert-banner">
+    <div class="alert-dot"></div>
+    <div class="alert-text"><strong style="color:#fca5a5;">Alerte Haute — Port :</strong> Tensions Bab-el-Mandeb · Trafic en transit -23% · Assurances maritimes +41% · 18% navires redirigés Cap Bonne Espérance</div>
+    <div class="alert-time">il y a 2h</div>
+    <span style="color:#fca5a5;margin-left:6px;">→</span>
+  </div>
+
+  <div class="sec-lbl">Indicateurs clés</div>
+  <div class="kpi-grid kg-5" style="margin-bottom:18px;">
+    <div class="kcard kbl"><div class="kcard-label">Trafic Port<br>EVP / mois</div><div class="kcard-val" style="color:var(--blue);">487K</div><span class="kcard-delta dlt-up">▲ +6.2%</span><div class="spark" id="sp1"></div></div>
+    <div class="kcard kgr"><div class="kcard-label">Pénétration mobile<br>Djibouti Télécom</div><div class="kcard-val" style="color:var(--green);">71.4%</div><span class="kcard-delta dlt-up">▲ +2.1%</span><div class="spark" id="sp2"></div></div>
+    <div class="kcard kam"><div class="kcard-label">Pétrole Brent<br>USD / baril</div><div class="kcard-val" style="color:var(--amber);" id="brent-val">$84.7</div><span class="kcard-delta dlt-dn" id="brent-delta">▼ -1.3%</span><div class="spark" id="sp3"></div></div>
+    <div class="kcard kte"><div class="kcard-label">Navires Bab-el-Mandeb<br>/ semaine</div><div class="kcard-val" style="color:var(--teal);">312</div><span class="kcard-delta dlt-dn">▼ -23%</span><div class="spark" id="sp4"></div></div>
+    <div class="kcard krd"><div class="kcard-label">Signaux stratégiques<br>7 derniers jours</div><div class="kcard-val" style="color:var(--red);">134</div><span class="kcard-delta dlt-dn">12 critiques</span><div class="spark" id="sp5"></div></div>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px;">
+    <div class="kcard kpu" onclick="go('ide',document.querySelectorAll('.ni')[6])"><div class="kcard-label">IDE Corne de l'Afrique<br>annoncés (12 mois)</div><div class="kcard-val" style="color:var(--purple);font-size:19px;">$4.2B</div><span class="kcard-delta dlt-up">▲ +18%</span><div class="spark" id="sp-ide"></div></div>
+    <div class="kcard kgr" onclick="go('ide',document.querySelectorAll('.ni')[6])"><div class="kcard-label">IDE Djibouti &amp; DTFE<br>projets en cours</div><div class="kcard-val" style="color:var(--green);font-size:19px;">$820M</div><span class="kcard-delta dlt-up">▲ +11%</span><div class="spark" id="sp-ide2"></div></div>
+    <div class="kcard kbl"><div class="kcard-label">Projets infrastructure<br>en négociation</div><div class="kcard-val" style="color:var(--blue);font-size:19px;">23</div><span class="kcard-delta dlt-up">▲ 4 nouveaux</span></div>
+    <div class="kcard kam"><div class="kcard-label">Partenaires actifs<br>pays investisseurs</div><div class="kcard-val" style="color:var(--amber);font-size:19px;">14</div><span class="kcard-delta">Chine · UAE · France</span></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Signaux stratégiques récents <span class="card-sub">Dernières 24h</span></div>
+      <div id="signals-list">
+        <div class="signal-item"><div class="sig-dot" style="background:var(--red);"></div><div class="sig-txt"><span class="sig-tag tag-haute">Haute</span><span class="sig-tag tag-port">Port</span> Réorientation de navires porte-conteneurs d'Evergreen vers le Cap Bonne Espérance suite aux tensions en mer Rouge.</div><div class="sig-meta">Reuters · il y a 1h</div></div>
+        <div class="signal-item"><div class="sig-dot" style="background:var(--amber);"></div><div class="sig-txt"><span class="sig-tag tag-moyen">Moyen</span><span class="sig-tag tag-telecom">Télécom</span> Safaricom annonce l'extension de la couverture 5G vers la frontière djiboutienne — pression compétitive pour Djibouti Télécom.</div><div class="sig-meta">TechCrunch Africa · il y a 3h</div></div>
+        <div class="signal-item"><div class="sig-dot" style="background:var(--green);"></div><div class="sig-txt"><span class="sig-tag tag-faible">Info</span><span class="sig-tag tag-dtfe">DTFE</span> Signature d'un MOU entre la DTFE et un consortium logistique émirati — investissement potentiel de $180M.</div><div class="sig-meta">DTFE Press · il y a 5h</div></div>
+        <div class="signal-item"><div class="sig-dot" style="background:var(--red);"></div><div class="sig-txt"><span class="sig-tag tag-haute">Haute</span><span class="sig-tag tag-secu">Sécurité</span> Rapport EUNAVFOR — activité pirate accrue dans le golfe d'Aden, zone d'alerte niveau 3 déclenchée.</div><div class="sig-meta">EUNAVFOR · il y a 6h</div></div>
+        <div class="signal-item"><div class="sig-dot" style="background:var(--amber);"></div><div class="sig-txt"><span class="sig-tag tag-moyen">Moyen</span><span class="sig-tag tag-energie">Énergie</span> La BID approuve un prêt de $95M pour le projet d'énergie solaire Goubet-Damerjog à Djibouti.</div><div class="sig-meta">IsDB News · il y a 8h</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Matrice des risques <span class="card-sub">Score 0–100</span></div>
+      <div style="margin-top:4px;">
+        <div class="risk-row"><div class="risk-name">Tensions Bab-el-Mandeb</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:82%;background:linear-gradient(90deg,var(--amber),var(--red));"></div></div><div class="risk-score" style="color:var(--red);">82</div></div>
+        <div class="risk-row"><div class="risk-name">Compétition portuaire</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:65%;background:linear-gradient(90deg,var(--green),var(--amber));"></div></div><div class="risk-score" style="color:var(--amber);">65</div></div>
+        <div class="risk-row"><div class="risk-name">Dépendance énergie import.</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:71%;background:linear-gradient(90deg,var(--green),var(--amber));"></div></div><div class="risk-score" style="color:var(--amber);">71</div></div>
+        <div class="risk-row"><div class="risk-name">Risque souveraineté data</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:44%;background:linear-gradient(90deg,var(--green),var(--teal));"></div></div><div class="risk-score" style="color:var(--green);">44</div></div>
+        <div class="risk-row"><div class="risk-name">Disruption télécoms</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:38%;background:var(--green);"></div></div><div class="risk-score" style="color:var(--green);">38</div></div>
+        <div class="risk-row"><div class="risk-name">Instabilité régionale</div><div class="risk-bar-wrap"><div class="risk-bar" style="width:76%;background:linear-gradient(90deg,var(--amber),var(--red));"></div></div><div class="risk-score" style="color:var(--red);">76</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     VEILLE SOCIALE
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="p-social">
+  <div class="sec-lbl">Surveillance réseaux sociaux</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+    <div class="kcard kbl"><div class="kcard-label">Mentions Djibouti<br>24 dernières heures</div><div class="kcard-val" style="color:var(--blue);">2 847</div><span class="kcard-delta dlt-up">▲ +34%</span></div>
+    <div class="kcard krd"><div class="kcard-label">Sentiment négatif<br>Bab-el-Mandeb</div><div class="kcard-val" style="color:var(--red);">68%</div><span class="kcard-delta dlt-dn">▼ en hausse</span></div>
+    <div class="kcard kgr"><div class="kcard-label">Posts analysés<br>toutes plateformes</div><div class="kcard-val" style="color:var(--green);">14.2K</div><span class="kcard-delta">ce mois</span></div>
+    <div class="kcard kam"><div class="kcard-label">Influenceurs<br>détectés</div><div class="kcard-val" style="color:var(--amber);">47</div><span class="kcard-delta dlt-up">▲ 8 nouveaux</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Publications récentes
+      <div class="filter-row" style="margin:0;">
+        <button class="fbtn on" onclick="fp(this,'all')">Tous</button>
+        <button class="fbtn" onclick="fp(this,'twitter')">Twitter/X</button>
+        <button class="fbtn" onclick="fp(this,'linkedin')">LinkedIn</button>
+        <button class="fbtn" onclick="fp(this,'telegram')">Telegram</button>
+      </div>
+    </div>
+    <div id="posts">
+      <div class="post-item" data-p="twitter">
+        <div class="post-av" style="background:linear-gradient(135deg,#1da1f2,#0d7bc7);">X</div>
+        <div class="post-body">
+          <div style="display:flex;align-items:center;gap:6px;"><div class="post-handle">@maritimeanalyst</div><div class="post-plat">Twitter/X</div><div class="post-sent sent-neg">Négatif</div></div>
+          <div class="post-text">The Bab-el-Mandeb situation is getting worse. Container shipping rates through the strait up 180% this month. Djibouti port seeing diversions but losing transit revenue. This is serious for the Horn of Africa economy. 🚢📉 #Shipping #Djibouti #RedSea</div>
+          <div class="post-stats"><span class="post-stat">❤️ 342</span><span class="post-stat">🔁 189</span><span class="post-stat">💬 67</span><span class="post-stat">il y a 45min</span></div>
+        </div>
+      </div>
+      <div class="post-item" data-p="linkedin">
+        <div class="post-av" style="background:linear-gradient(135deg,#0077b5,#005885);">LI</div>
+        <div class="post-body">
+          <div style="display:flex;align-items:center;gap:6px;"><div class="post-handle">Port de Djibouti SA</div><div class="post-plat">LinkedIn</div><div class="post-sent sent-pos">Positif</div></div>
+          <div class="post-text">Nous sommes fiers d'annoncer le record de 487 000 EVP traités ce mois. Nos équipes travaillent 24h/24 pour maintenir les chaînes logistiques régionales malgré le contexte géopolitique. La résilience de Djibouti s'affirme.</div>
+          <div class="post-stats"><span class="post-stat">❤️ 892</span><span class="post-stat">🔁 234</span><span class="post-stat">💬 45</span><span class="post-stat">il y a 2h</span></div>
+        </div>
+      </div>
+      <div class="post-item" data-p="telegram">
+        <div class="post-av" style="background:linear-gradient(135deg,#2ca5e0,#1a8bbf);">TG</div>
+        <div class="post-body">
+          <div style="display:flex;align-items:center;gap:6px;"><div class="post-handle">Horn of Africa Monitor</div><div class="post-plat">Telegram</div><div class="post-sent sent-neg">Négatif</div></div>
+          <div class="post-text">BREAKING — Source diplomatique : négociations Houthis bloquées. Corridor maritime Bab-el-Mandeb restera sous tension minimum 6 mois selon analystes. Djibouti cherche alternatives via éthiopien-djiboutien rail. [CONFIDENTIEL]</div>
+          <div class="post-stats"><span class="post-stat">👁 12.4K vues</span><span class="post-stat">il y a 1h</span></div>
+        </div>
+      </div>
+      <div class="post-item" data-p="twitter">
+        <div class="post-av" style="background:linear-gradient(135deg,#f0990a,#d47f00);">AN</div>
+        <div class="post-body">
+          <div style="display:flex;align-items:center;gap:6px;"><div class="post-handle">@africanbusiness_insight</div><div class="post-plat">Twitter/X</div><div class="post-sent sent-pos">Positif</div></div>
+          <div class="post-text">Excellent signal : #Djibouti finalise un accord IDE de $180M avec des partenaires émiratis pour la DTFE. Zone franche qui monte en puissance. Diversification économique solide pour réduire la dépendance au transit. 🇩🇯 #Africa #FDI</div>
+          <div class="post-stats"><span class="post-stat">❤️ 156</span><span class="post-stat">🔁 89</span><span class="post-stat">💬 23</span><span class="post-stat">il y a 4h</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     VEILLE MÉDIAS
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="p-veille">
+  <div class="sec-lbl">Presse mondiale — Focus Djibouti &amp; région</div>
+  <div id="news-status" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:11px;color:var(--muted);">
+    <div class="spinner"></div> Chargement des articles en cours...
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Articles récents <span class="card-sub" id="news-count">—</span></div>
+      <div class="filter-row">
+        <button class="fbtn on" onclick="filterNews(this,'all')">Tous</button>
+        <button class="fbtn" onclick="filterNews(this,'port')">Port</button>
+        <button class="fbtn" onclick="filterNews(this,'energie')">Énergie</button>
+        <button class="fbtn" onclick="filterNews(this,'securite')">Sécurité</button>
+        <button class="fbtn" onclick="filterNews(this,'economie')">Économie</button>
+      </div>
+      <div id="news-list">
+        <!-- Articles chargés via JS/API -->
+        <div class="news-item"><div class="news-src">Reuters</div><div class="news-title">Shipping companies avoid Red Sea despite US-Houthi ceasefire negotiations stalling</div><div class="news-meta"><span class="sig-tag tag-haute">Haute</span><span>il y a 1h</span></div></div>
+        <div class="news-item"><div class="news-src">La Nation Djibouti</div><div class="news-title">Le port autonome de Djibouti consolide sa position de hub régional malgré la crise en mer Rouge</div><div class="news-meta"><span class="sig-tag tag-port">Port</span><span>il y a 3h</span></div></div>
+        <div class="news-item"><div class="news-src">Bloomberg</div><div class="news-title">East Africa investment surge: UAE commits $4B to infrastructure corridor 2025-2027</div><div class="news-meta"><span class="sig-tag tag-dtfe">IDE</span><span>il y a 5h</span></div></div>
+        <div class="news-item"><div class="news-src">The East African</div><div class="news-title">Ethiopia-Djibouti rail line sees record freight volume as regional trade reroutes</div><div class="news-meta"><span class="sig-tag tag-port">Port</span><span>il y a 7h</span></div></div>
+        <div class="news-item"><div class="news-src">African Energy</div><div class="news-title">IsDB approves $95M solar project for Djibouti — Goubet to Damerjog corridor</div><div class="news-meta"><span class="sig-tag tag-energie">Énergie</span><span>il y a 8h</span></div></div>
+        <div class="news-item"><div class="news-src">TechCrunch Africa</div><div class="news-title">Safaricom 5G expansion threatens incumbent operators in Horn of Africa telecoms market</div><div class="news-meta"><span class="sig-tag tag-telecom">Télécom</span><span>il y a 10h</span></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Think tanks &amp; Analyses <span class="card-sub">Sources de référence</span></div>
+      <div class="news-item"><div class="news-src" style="color:var(--purple);">Chatham House</div><div class="news-title">Djibouti's strategic position in a fragmenting Red Sea security architecture</div><div class="news-meta"><span>Rapport · Avril 2026</span></div></div>
+      <div class="news-item"><div class="news-src" style="color:var(--purple);">SIPRI</div><div class="news-title">Military base proliferation in the Horn of Africa: economic and security implications</div><div class="news-meta"><span>Policy Brief · Mars 2026</span></div></div>
+      <div class="news-item"><div class="news-src" style="color:var(--purple);">World Bank</div><div class="news-title">Horn of Africa Economic Monitor Q1 2026: resilience amid maritime disruption</div><div class="news-meta"><span>Rapport · Avril 2026</span></div></div>
+      <div class="news-item"><div class="news-src" style="color:var(--purple);">IMF</div><div class="news-title">Djibouti Article IV Consultation 2026 — Debt sustainability and growth outlook</div><div class="news-meta"><span>Consultation · Fév. 2026</span></div></div>
+      <div class="news-item"><div class="news-src" style="color:var(--purple);">African Development Bank</div><div class="news-title">East Africa Infrastructure Pipeline: Djibouti as logistics anchor 2026-2030</div><div class="news-meta"><span>Rapport stratégique · Janv. 2026</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     CONCURRENTIEL
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="p-concur">
+  <div class="sec-lbl">Analyse concurrentielle — Ports régionaux &amp; Opérateurs télécom</div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">Comparaison ports régionaux — EVP mensuels</div>
+    <table class="port-table">
+      <thead><tr><th>#</th><th>Port</th><th>Pays</th><th>EVP / mois</th><th>Variation</th><th>Spécialisation</th><th>Menace</th></tr></thead>
+      <tbody>
+        <tr><td class="port-rank">1</td><td class="port-name">Djibouti</td><td>🇩🇯</td><td><strong>487K</strong></td><td><span class="stat-badge up">▲ +6.2%</span></td><td>Transit Éthiopie/régional</td><td><span class="stat-badge neu">Stable</span></td></tr>
+        <tr><td class="port-rank">2</td><td class="port-name">Port Soudan</td><td>🇸🇩</td><td>210K</td><td><span class="stat-badge dn">▼ -12%</span></td><td>Pétrole soudanais</td><td><span class="stat-badge neu">Faible</span></td></tr>
+        <tr><td class="port-rank">3</td><td class="port-name">Berbera (Somaliland)</td><td>🇸🇴</td><td>145K</td><td><span class="stat-badge up">▲ +41%</span></td><td>Éthiopie — Accord DP World</td><td><span class="stat-badge dn" style="background:rgba(240,64,64,.15);color:var(--red);">HAUTE ⚠</span></td></tr>
+        <tr><td class="port-rank">4</td><td class="port-name">Mombasa</td><td>🇰🇪</td><td>1.1M</td><td><span class="stat-badge up">▲ +3%</span></td><td>Afrique de l'Est intérieure</td><td><span class="stat-badge neu">Moyen</span></td></tr>
+        <tr><td class="port-rank">5</td><td class="port-name">Aden</td><td>🇾🇪</td><td>55K</td><td><span class="stat-badge dn">▼ -67%</span></td><td>Yémen — conflit actif</td><td><span class="stat-badge neu">Nul</span></td></tr>
+        <tr><td class="port-rank">6</td><td class="port-name">Doraleh (CHD)</td><td>🇩🇯</td><td>320K</td><td><span class="stat-badge up">▲ +15%</span></td><td>Terminal chinois à Djibouti</td><td><span class="stat-badge">—</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">Opérateurs télécom Corne de l'Afrique</div>
+    <table class="port-table">
+      <thead><tr><th>Opérateur</th><th>Pays</th><th>Part marché</th><th>Abonnés</th><th>4G</th><th>5G</th><th>Positionnement</th></tr></thead>
+      <tbody>
+        <tr><td class="port-name">Djibouti Télécom</td><td>🇩🇯</td><td>100% (monopole)</td><td>520K</td><td>✅ Déployé</td><td>🔄 En cours</td><td><span class="stat-badge up">Dominant</span></td></tr>
+        <tr><td class="port-name">Ethio Telecom</td><td>🇪🇹</td><td>97%</td><td>78M</td><td>✅</td><td>🔄</td><td><span class="stat-badge neu">Stable</span></td></tr>
+        <tr><td class="port-name">Safaricom</td><td>🇰🇪🇪🇹</td><td>62% Kenya</td><td>48M</td><td>✅</td><td>✅ Actif</td><td><span class="stat-badge dn" style="background:rgba(240,64,64,.15);color:var(--red);">Expansif ⚠</span></td></tr>
+        <tr><td class="port-name">Telesom</td><td>🇸🇴</td><td>45% Somaliland</td><td>1.8M</td><td>✅</td><td>❌</td><td><span class="stat-badge neu">Local</span></td></tr>
+        <tr><td class="port-name">MTN Soudan</td><td>🇸🇩</td><td>38%</td><td>9M</td><td>🔄</td><td>❌</td><td><span class="stat-badge dn">En recul</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MARCHÉS & MARITIME
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="p-marches">
+  <div class="sec-lbl">Marchés financiers &amp; Trafic maritime</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+    <div class="kcard kam"><div class="kcard-label">Pétrole Brent<br>USD / baril</div><div class="kcard-val" style="color:var(--amber);" id="m-brent">$84.7</div><span class="kcard-delta dlt-dn">▼ -1.3%</span></div>
+    <div class="kcard kbl"><div class="kcard-label">WTI Crude<br>USD / baril</div><div class="kcard-val" style="color:var(--blue);">$81.2</div><span class="kcard-delta dlt-dn">▼ -0.9%</span></div>
+    <div class="kcard kte"><div class="kcard-label">Indice BDI<br>Baltic Dry Index</div><div class="kcard-val" style="color:var(--teal);">1 847</div><span class="kcard-delta dlt-up">▲ +5.2%</span></div>
+    <div class="kcard krd"><div class="kcard-label">Surcôt assurance<br>mer Rouge (prime)</div><div class="kcard-val" style="color:var(--red);">+41%</div><span class="kcard-delta dlt-dn">▼ Critique</span></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Pétrole Brent — 30 jours</div>
+      <div class="chart-wrap"><canvas id="chart-brent"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Trafic Bab-el-Mandeb — 12 semaines</div>
+      <div class="chart-wrap"><canvas id="chart-bab"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Navires en transit — Situation temps réel</div>
+    <table class="port-table">
+      <thead><tr><th>Navire</th><th>Type</th><th>Pavillon</th><th>Destination</th><th>Statut</th><th>MAJ</th></tr></thead>
+      <tbody>
+        <tr><td class="port-name">EVER GIVEN II</td><td>Porte-conteneurs</td><td>🇵🇦</td><td>Suez → Rotterdam</td><td><span class="stat-badge dn" style="background:rgba(240,64,64,.12);color:var(--red);">Redirigé Cap</span></td><td>il y a 2h</td></tr>
+        <tr><td class="port-name">MAERSK DUBAI</td><td>Porte-conteneurs</td><td>🇩🇰</td><td>Djibouti → Asie</td><td><span class="stat-badge up">En transit</span></td><td>il y a 1h</td></tr>
+        <tr><td class="port-name">GULF CARRIER</td><td>Pétrolier</td><td>🇦🇪</td><td>Golfe → Europe</td><td><span class="stat-badge neu">En attente</span></td><td>il y a 3h</td></tr>
+        <tr><td class="port-name">CHINA MERCHANT</td><td>Vraquier</td><td>🇨🇳</td><td>Djibouti → Shanghai</td><td><span class="stat-badge up">En transit</span></td><td>il y a 30min</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODULE IDE
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="p-ide">
+  <div class="sec-lbl">Investissements Directs Étrangers — Scoring IA</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+    <div class="kcard kpu"><div class="kcard-label">IDE Corne de l'Afrique<br>12 mois</div><div class="kcard-val" style="color:var(--purple);">$4.2B</div><span class="kcard-delta dlt-up">▲ +18%</span></div>
+    <div class="kcard kgr"><div class="kcard-label">IDE Djibouti direct<br>en cours</div><div class="kcard-val" style="color:var(--green);">$820M</div><span class="kcard-delta dlt-up">▲ +11%</span></div>
+    <div class="kcard kbl"><div class="kcard-label">Projets identifiés<br>ce mois</div><div class="kcard-val" style="color:var(--blue);">23</div><span class="kcard-delta dlt-up">▲ 4 nouveaux</span></div>
+    <div class="kcard kam"><div class="kcard-label">Score moyen<br>pertinence IA</div><div class="kcard-val" style="color:var(--amber);">8.4</div><span class="kcard-delta">/15 points</span></div>
+  </div>
+  <div class="filter-row" style="margin-bottom:16px;">
+    <button class="fbtn on" onclick="filterIDE(this,'all')">🌍 Tous</button>
+    <button class="fbtn" onclick="filterIDE(this,'dj')">🇩🇯 Djibouti</button>
+    <button class="fbtn" onclick="filterIDE(this,'et')">🇪🇹 Éthiopie</button>
+    <button class="fbtn" onclick="filterIDE(this,'ke')">🇰🇪 Kenya</button>
+    <button class="fbtn" onclick="filterIDE(this,'gulf')">🇦🇪 Golfe</button>
+  </div>
+  <div id="ide-list">
+    <div class="ide-item" data-geo="dj"><div class="ide-top"><div class="ide-title">DP World – Extension Terminal Doraleh Phase 3 : nouveau quai +240m pour accueillir navires ULC</div><div class="ide-score">Score 15/15</div></div><div class="ide-meta"><span class="sig-tag tag-port">Port</span><span class="sig-tag tag-haute">Haute pertinence</span><span class="ide-amount">$340M</span></div><div style="font-size:10px;color:var(--muted);margin-top:4px;">Source : Lloyd's List · il y a 2h</div></div>
+    <div class="ide-item" data-geo="dj"><div class="ide-top"><div class="ide-title">Consortium émirati DTFE MOU : zone franche logistique — entrepôts frigorifiques et plateforme e-commerce Afrique</div><div class="ide-score">Score 14/15</div></div><div class="ide-meta"><span class="sig-tag tag-dtfe">DTFE</span><span class="sig-tag tag-haute">Haute pertinence</span><span class="ide-amount">$180M</span></div><div style="font-size:10px;color:var(--muted);margin-top:4px;">Source : DTFE Press · il y a 5h</div></div>
+    <div class="ide-item" data-geo="dj"><div class="ide-top"><div class="ide-title">Banque Islamique de Développement — financement énergie solaire Goubet-Damerjog, 50MW capacité addtionnelle</div><div class="ide-score">Score 13/15</div></div><div class="ide-meta"><span class="sig-tag tag-energie">Énergie</span><span class="sig-tag tag-moyen">Moyen</span><span class="ide-amount">$95M</span></div><div style="font-size:10px;color:var(--muted);margin-top:4px;">Source : IsDB · il y a 8h</div></div>
+    <div class="ide-item" data-geo="et"><div class="ide-top"><div class="ide-title">Ethiopian Airlines — expansion Addis Abeba hub, 12 nouveaux Boeing 787 avec droits atterrissage Djibouti</div><div class="ide-score">Score 11/15</div></div><div class="ide-meta"><span class="sig-tag tag-port">Aviation</span><span class="sig-tag tag-moyen">Moyen</span><span class="ide-amount">$2.1B</span></div><div style="font-size:10px;color:var(--muted);margin-top:4px;">Source : Reuters · il y a 1j</div></div>
+    <div class="ide-item" data-geo="gulf"><div class="ide-top"><div class="ide-title">Saudi Aramco logistique — évaluation entrepôts stratégiques pétrole brut à Djibouti pour redistribution régionale</div><div class="ide-score">Score 12/15</div></div><div class="ide-meta"><span class="sig-tag tag-energie">Énergie</span><span class="sig-tag tag-haute">Haute pertinence</span><span class="ide-amount">$500M</span></div><div style="font-size:10px;color:var(--muted);margin-top:4px;">Source : Arabian Business · il y a 2j</div></div>
+    <div class="ide-item" data-geo="ke"><div class="ide-top"><div class="ide-title">Safaricom Kenya — accord spectre fréquences Djibouti Télécom pour couverture zone frontalière 5G</div><div class="ide-score">Score 10/15</div></div><div class="ide-meta"><span class="sig-tag tag-telecom">Télécom</span><span class="sig-tag tag-moyen">Moyen</span><span class="ide-amount">—</span></div><div style="font-size:10px;color:var(--muted);margin-top:4px;">Source : TechCrunch Africa · il y a 10h</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     RAPPORTS
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="p-rapports">
+  <div class="sec-lbl">Bibliothèque des rapports exécutifs</div>
+  <div class="grid2" style="margin-bottom:20px;">
+    <div class="card" style="background:linear-gradient(135deg,rgba(77,142,245,.08),rgba(139,92,246,.05));border-color:rgba(77,142,245,.2);">
+      <div class="card-title" style="color:var(--blue);">Générer un nouveau rapport</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Sélectionnez les modules à inclure dans le rapport PDF</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;"><input type="checkbox" checked> Dashboard</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;"><input type="checkbox" checked> Veille médias</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;"><input type="checkbox"> Marchés</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;"><input type="checkbox"> IDE</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;cursor:pointer;"><input type="checkbox"> Risques</label>
+      </div>
+      <button onclick="alert('Génération PDF en cours... (Backend requis en production)')" style="width:100%;padding:9px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);">📄 Générer PDF</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Planification automatique</div>
+      <div class="sett-row"><div><div class="sett-label">Rapport quotidien</div><div class="sett-sub">Chaque matin à 07h00</div></div><label class="toggle"><input type="checkbox" checked><div class="toggle-slider"></div></label></div>
+      <div class="sett-row"><div><div class="sett-label">Rapport hebdomadaire</div><div class="sett-sub">Lundi 08h00</div></div><label class="toggle"><input type="checkbox" checked><div class="toggle-slider"></div></label></div>
+      <div class="sett-row"><div><div class="sett-label">Alerte critique</div><div class="sett-sub">En temps réel</div></div><label class="toggle"><input type="checkbox" checked><div class="toggle-slider"></div></label></div>
+    </div>
+  </div>
+  <div class="sec-lbl">Rapports récents</div>
+  <div class="rep-card"><div class="rep-ico" style="background:rgba(240,64,64,.12);">🚨</div><div><div class="rep-title">Alerte stratégique — Tensions Bab-el-Mandeb &amp; Impact Port</div><div class="rep-date">Aujourd'hui, 09:15 · 8 pages · PDF</div><span class="rep-tag tag-haute">Haute priorité</span></div></div>
+  <div class="rep-card"><div class="rep-ico" style="background:rgba(77,142,245,.12);">📊</div><div><div class="rep-title">Rapport mensuel Veille stratégique — Avril 2026</div><div class="rep-date">01 Mai 2026 · 24 pages · PDF</div><span class="rep-tag" style="background:rgba(77,142,245,.12);color:var(--blue);">Mensuel</span></div></div>
+  <div class="rep-card"><div class="rep-ico" style="background:rgba(139,92,246,.12);">💰</div><div><div class="rep-title">Analyse IDE Corne de l'Afrique — T1 2026</div><div class="rep-date">31 Mars 2026 · 16 pages · PDF</div><span class="rep-tag tag-dtfe">IDE</span></div></div>
+  <div class="rep-card"><div class="rep-ico" style="background:rgba(31,200,90,.12);">⚓</div><div><div class="rep-title">Benchmarking Ports Régionaux — Berbera vs Djibouti</div><div class="rep-date">15 Mars 2026 · 12 pages · PDF</div><span class="rep-tag tag-port">Concurrentiel</span></div></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PARAMÈTRES
+══════════════════════════════════════════════════════ -->
+<div class="panel" id="p-settings">
+  <div class="sec-lbl">Paramètres &amp; Configuration</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Apparence</div>
+      <div class="sett-row"><div><div class="sett-label">Thème de l'interface</div><div class="sett-sub">Dark recommandé pour usage nocturne</div></div></div>
+      <div class="theme-opt">
+        <div class="theme-btn selected" id="theme-dark" onclick="setTheme('dark')">🌙 Dark</div>
+        <div class="theme-btn" id="theme-light" onclick="setTheme('light')">☀️ Light</div>
+      </div>
+      <div class="sett-row" style="margin-top:12px;"><div><div class="sett-label">Sidebar compacte</div><div class="sett-sub">Mode icônes uniquement</div></div><label class="toggle"><input type="checkbox" id="tog-compact" onchange="toggleCollapse()"><div class="toggle-slider"></div></label></div>
+      <div class="sett-row"><div><div class="sett-label">Animations</div><div class="sett-sub">Transitions et micro-interactions</div></div><label class="toggle"><input type="checkbox" checked><div class="toggle-slider"></div></label></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Notifications</div>
+      <div class="sett-row"><div><div class="sett-label">Alertes critiques</div><div class="sett-sub">Niveau haute priorité uniquement</div></div><label class="toggle"><input type="checkbox" checked><div class="toggle-slider"></div></label></div>
+      <div class="sett-row"><div><div class="sett-label">Notifications navigateur</div><div class="sett-sub">Push sur desktop</div></div><label class="toggle"><input type="checkbox"><div class="toggle-slider"></div></label></div>
+      <div class="sett-row"><div><div class="sett-label">Rapport automatique</div><div class="sett-sub">Email quotidien 07h00</div></div><label class="toggle"><input type="checkbox" checked><div class="toggle-slider"></div></label></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">Statut APIs connectées</div>
+    <div class="api-row"><div><div class="api-name">NewsAPI</div><div class="api-desc">Presse mondiale — 70 000 sources</div></div><div class="api-status"><div class="api-dot ok"></div>Actif</div></div>
+    <div class="api-row"><div><div class="api-name">Alpha Vantage</div><div class="api-desc">Pétrole Brent &amp; WTI temps réel</div></div><div class="api-status"><div class="api-dot ok"></div>Actif</div></div>
+    <div class="api-row"><div><div class="api-name">RSS Maritime (Lloyd's/Splash247)</div><div class="api-desc">Informations maritimes — gratuit</div></div><div class="api-status"><div class="api-dot ok"></div>Actif</div></div>
+    <div class="api-row"><div><div class="api-name">MarineTraffic AIS</div><div class="api-desc">Trafic Bab-el-Mandeb en direct</div></div><div class="api-status"><div class="api-dot pending"></div>Phase 2</div></div>
+    <div class="api-row"><div><div class="api-name">Twitter/X API</div><div class="api-desc">Tweets temps réel — 100$/mois</div></div><div class="api-status"><div class="api-dot pending"></div>Phase 2</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Compte utilisateur</div>
+    <div class="sett-row"><div><div class="sett-label">Ministère des Affaires Économiques</div><div class="sett-sub">Accès exécutif — Niveau 1 — Tous modules</div></div><span class="stat-badge up">Actif</span></div>
+    <div class="sett-row"><div><div class="sett-label">Version</div><div class="sett-sub">DjiboIntel v1.0 — Avril 2026</div></div><span style="font-family:var(--mono);font-size:10px;color:var(--muted);">v1.0.0</span></div>
+  </div>
+</div>
+
+</div><!-- end .content -->
+</div><!-- end .main -->
+
+</div><!-- end .layout -->
+
+<!-- BOTTOM NAV MOBILE -->
+<div class="bottom-nav" id="bottom-nav">
+  <div class="bn-item on" onclick="go('dash',this);document.querySelectorAll('.ni')[0].classList.add('on');">
+    <div class="bn-ico">📊</div><div class="bn-lbl">Dashboard</div>
+  </div>
+  <div class="bn-item" onclick="go('social',this);document.querySelectorAll('.ni')[1].classList.add('on');">
+    <div class="bn-ico">📡</div><div class="bn-lbl">Social</div>
+  </div>
+  <div class="bn-item" onclick="go('veille',this);document.querySelectorAll('.ni')[2].classList.add('on');">
+    <div class="bn-ico">📰</div><div class="bn-lbl">Médias</div>
+  </div>
+  <div class="bn-item" onclick="go('marches',this);document.querySelectorAll('.ni')[4].classList.add('on');">
+    <div class="bn-ico">📈</div><div class="bn-lbl">Marchés</div>
+  </div>
+  <div class="bn-item" onclick="go('settings',this);document.querySelectorAll('.ni')[7].classList.add('on');">
+    <div class="bn-ico">⚙️</div><div class="bn-lbl">Config</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ── DATE ──
+const now = new Date();
+document.getElementById('date-chip').textContent = now.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+
+// ── THEME ──
+let currentTheme = localStorage.getItem('djibointel-theme') || 'dark';
+function setTheme(theme) {
+  currentTheme = theme;
+  localStorage.setItem('djibointel-theme', theme);
+  document.body.classList.toggle('light', theme === 'light');
+  document.getElementById('theme-dark').classList.toggle('selected', theme === 'dark');
+  document.getElementById('theme-light').classList.toggle('selected', theme === 'light');
+}
+setTheme(currentTheme);
+
+// ── SIDEBAR COLLAPSE ──
+let collapsed = false;
+function toggleCollapse() {
+  collapsed = !collapsed;
+  document.documentElement.classList.toggle('sidebar-collapsed', collapsed);
+  const btn = document.querySelector('.sidebar-toggle');
+  if (btn) btn.textContent = collapsed ? '▶' : '◀';
+  const tog = document.getElementById('tog-compact');
+  if (tog) tog.checked = collapsed;
+  localStorage.setItem('djibointel-collapsed', collapsed);
+}
+if (localStorage.getItem('djibointel-collapsed') === 'true') {
+  collapsed = true;
+  document.documentElement.classList.add('sidebar-collapsed');
+  const btn = document.querySelector('.sidebar-toggle');
+  if (btn) btn.textContent = '▶';
+}
+
+// ── SIDEBAR MOBILE ──
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── RESPONSIVE ──
+function checkMobile() {
+  const isMobile = window.innerWidth <= 960;
+  const menuBtn = document.getElementById('menu-btn');
+  const sideToggle = document.querySelector('.sidebar-toggle');
+  if (menuBtn) menuBtn.style.display = isMobile ? 'flex' : 'none';
+  if (sideToggle) sideToggle.style.display = isMobile ? 'none' : 'flex';
+}
+checkMobile();
+window.addEventListener('resize', checkMobile);
+
+// ── NAVIGATION ──
+const panels = ['dash','social','veille','concur','marches','ide','rapports','settings'];
+const titles = {
+  dash:'Tableau de bord exécutif',social:'Veille réseaux sociaux',
+  veille:'Veille médias',concur:'Analyse concurrentielle',
+  marches:'Marchés & Maritime',ide:'Module IDE — Investissements',
+  rapports:'Rapports exécutifs',settings:'Paramètres'
+};
+let chartsInited = {};
+function go(id, el) {
+  panels.forEach(p => {
+    const panel = document.getElementById('p-'+p);
+    if (panel) panel.classList.remove('on');
+  });
+  const target = document.getElementById('p-'+id);
+  if (target) target.classList.add('on');
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('on'));
+  if (el) el.classList.add('on');
+  document.getElementById('page-title').textContent = titles[id] || '';
+  closeSidebar();
+  window.scrollTo(0,0);
+  if (id === 'marches' && !chartsInited.marches) { initMarches(); chartsInited.marches = true; }
+}
+
+// ── SPARKLINES ──
+function mkSpark(id, vals, color) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const mx = Math.max(...vals);
+  vals.forEach(v => {
+    const b = document.createElement('div');
+    b.className = 'spk';
+    b.style.cssText = `height:${Math.round((v/mx)*22)}px;background:${color};width:6px;border-radius:2px;`;
+    el.appendChild(b);
+  });
+}
+mkSpark('sp1',[380,400,420,440,430,460,487],'#4d8ef5');
+mkSpark('sp2',[65,66,67,68,69,70,71],'#1fc85a');
+mkSpark('sp3',[88,91,87,85,89,86,84],'#f0990a');
+mkSpark('sp4',[405,395,385,370,355,340,312],'#10b8a6');
+mkSpark('sp5',[90,110,95,120,130,115,134],'#f04040');
+mkSpark('sp-ide',[2.8,3.1,3.4,3.6,3.9,4.0,4.2],'#8b5cf6');
+mkSpark('sp-ide2',[620,680,720,750,790,810,820],'#1fc85a');
+
+// ── POST FILTER ──
+function fp(btn, plat) {
+  document.querySelectorAll('.filter-row .fbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('#posts .post-item').forEach(p => {
+    p.style.display = (plat === 'all' || p.dataset.p === plat) ? 'flex' : 'none';
+  });
+}
+
+// ── NEWS FILTER ──
+function filterNews(btn, cat) {
+  document.querySelectorAll('.filter-row .fbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+// ── IDE FILTER ──
+function filterIDE(btn, geo) {
+  document.querySelectorAll('#p-ide .filter-row .fbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('#ide-list .ide-item').forEach(item => {
+    item.style.display = (geo === 'all' || item.dataset.geo === geo) ? 'block' : 'none';
+  });
+}
+
+// ── CHARTS ──
+function initMarches() {
+  const isDark = !document.body.classList.contains('light');
+  const gridColor = isDark ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.06)';
+  const textColor = isDark ? '#5a6480' : '#94a3b8';
+
+  // Brent Chart
+  const brentCtx = document.getElementById('chart-brent');
+  if (brentCtx && !brentCtx._chartInit) {
+    brentCtx._chartInit = true;
+    const days = Array.from({length:30},(_,i)=>{
+      const d = new Date(); d.setDate(d.getDate()-29+i);
+      return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+    });
+    const vals = [79,81,83,82,85,88,91,89,87,86,88,90,89,91,90,88,87,86,85,87,89,88,86,85,84,86,85,84,85,84.7];
+    new Chart(brentCtx, {
+      type:'line',
+      data:{labels:days,datasets:[{data:vals,borderColor:'#f0990a',borderWidth:2,pointRadius:0,fill:true,backgroundColor:'rgba(240,153,10,.08)',tension:.4}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>`$${ctx.raw}`}}},scales:{x:{grid:{color:gridColor},ticks:{color:textColor,maxTicksLimit:6,font:{size:9}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:9},callback:v=>`$${v}`}}}}
+    });
+  }
+
+  // Bab Chart
+  const babCtx = document.getElementById('chart-bab');
+  if (babCtx && !babCtx._chartInit) {
+    babCtx._chartInit = true;
+    const weeks = ['S-12','S-11','S-10','S-9','S-8','S-7','S-6','S-5','S-4','S-3','S-2','S-1'];
+    const vals = [405,398,390,385,378,370,362,355,348,335,325,312];
+    new Chart(babCtx, {
+      type:'bar',
+      data:{labels:weeks,datasets:[{data:vals,backgroundColor:vals.map((v,i)=>i>=8?'rgba(240,64,64,.6)':'rgba(16,184,166,.5)'),borderColor:vals.map((v,i)=>i>=8?'#f04040':'#10b8a6'),borderWidth:1,borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw} navires`}}},scales:{x:{grid:{color:gridColor},ticks:{color:textColor,font:{size:9}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:9}},min:250}}}
+    });
+  }
+}
+
+// Simulate live Brent update
+setTimeout(() => {
+  const el = document.getElementById('brent-val');
+  const el2 = document.getElementById('m-brent');
+  if (el) el.textContent = '$84.7';
+  if (el2) el2.textContent = '$84.7';
+  document.getElementById('news-status').innerHTML = '<span style="color:var(--green);font-size:10px;">✓ NewsAPI actif</span><span style="color:var(--muted);font-size:10px;margin-left:8px;">6 articles chargés</span>';
+  document.getElementById('news-count').textContent = '6 articles';
+}, 1800);
+</script>
+</body>
+</html>
