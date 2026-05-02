@@ -1,0 +1,7 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/"
+  to = "/djibointel.html"
+  status = 200
