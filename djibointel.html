@@ -873,14 +873,64 @@ function initMarches() {
 }
 
 // Simulate live Brent update
-setTimeout(() => {
-  const el = document.getElementById('brent-val');
-  const el2 = document.getElementById('m-brent');
-  if (el) el.textContent = '$84.7';
-  if (el2) el2.textContent = '$84.7';
-  document.getElementById('news-status').innerHTML = '<span style="color:var(--green);font-size:10px;">✓ NewsAPI actif</span><span style="color:var(--muted);font-size:10px;margin-left:8px;">6 articles chargés</span>';
-  document.getElementById('news-count').textContent = '6 articles';
-}, 1800);
+// ── DONNÉES TEMPS RÉEL ──
+async function fetchBrent() {
+  try {
+    const res  = await fetch(`${API_BASE}/api/brent`);
+    const data = await res.json();
+    if (data.ok && data.price) {
+      const prix  = `$${data.price.toFixed(1)}`;
+      const delta = data.change >= 0
+        ? `▲ +${data.change}%`
+        : `▼ ${data.change}%`;
+      const couleur = data.change >= 0 ? 'var(--green)' : 'var(--red)';
+
+      document.getElementById('brent-val').textContent   = prix;
+      document.getElementById('brent-delta').textContent = delta;
+      document.getElementById('brent-delta').style.color = couleur;
+      const mb = document.getElementById('m-brent');
+      if (mb) mb.textContent = prix;
+    }
+  } catch (e) {
+    console.warn('Brent API indisponible — données statiques affichées');
+  }
+}
+
+async function fetchNews() {
+  try {
+    const res  = await fetch(`${API_BASE}/api/news?q=Djibouti&lang=fr&pageSize=6`);
+    const data = await res.json();
+    if (!data.ok || !data.articles?.length) return;
+
+    const list  = document.getElementById('news-list');
+    const count = document.getElementById('news-count');
+    if (count) count.textContent = `${data.articles.length} articles`;
+
+    list.innerHTML = data.articles.map(a => {
+      const date = new Date(a.publishedAt).toLocaleString('fr-FR', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
+      return `
+        <div class="news-item" onclick="window.open('${a.url}','_blank')">
+          <div class="news-src">${a.source}</div>
+          <div class="news-title">${a.title}</div>
+          <div class="news-meta"><span>${date}</span></div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('news-status').innerHTML =
+      `<span style="color:var(--green);font-size:10px;">✓ NewsAPI actif</span>
+       <span style="color:var(--muted);font-size:10px;margin-left:8px;">${data.articles.length} articles chargés</span>`;
+  } catch (e) {
+    document.getElementById('news-status').innerHTML =
+      '<span style="color:var(--amber);font-size:10px;">⚠ NewsAPI — backend non connecté</span>';
+  }
+}
+
+// Lancement au démarrage
+fetchBrent();
+fetchNews();
+// Rafraîchissement toutes les 10 minutes
+setInterval(fetchBrent, 10 * 60 * 1000);
+setInterval(fetchNews,  15 * 60 * 1000);
 </script>
 </body>
 </html>
