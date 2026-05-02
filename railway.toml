@@ -1,0 +1,10 @@
+# railway.toml — Configuration déploiement Railway.app
+# Placez ce fichier à la racine du dossier backend
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "node server.js"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
